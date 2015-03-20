@@ -1,0 +1,55 @@
+#!/bin/bash
+
+set -eu
+
+function copy_tracked_files_to() {
+  base_dir=$1
+
+  for file in $(git ls-files)
+  do
+    dir="${base_dir}/$(dirname $file)"
+    if [ ! -d $dir ] ; then
+      mkdir -p $dir
+    fi
+
+    cp $file $dir
+  done
+}
+
+function make_package_dir() {
+  base_dir=$1
+  while :
+  do
+    if [ ! -d $base_dir ] ; then
+      mkdir $base_dir
+      break
+    fi
+    base_dir="${base_dir}_"
+  done
+}
+
+function main() {
+  project_prefix=$(basename `git rev-parse --show-toplevel`)
+
+  git stash > /dev/null 2>&1
+  original_branch=$(git branch -a | grep '^*' | sed -e 's/^* //')
+
+  IFS=$'\n'
+
+  for line in `git branch`
+  do
+    branch_name=$(echo $line | sed -e 's/^[ \*]*//') # remove unnecessary prefix
+    git checkout $branch_name > /dev/null 2>&1
+
+    base_dir="${project_prefix}_${branch_name}"
+    make_package_dir $base_dir
+
+    copy_tracked_files_to $base_dir
+  done
+
+  git checkout $original_branch > /dev/null 2>&1
+  git stash pop > /dev/null 2>&1
+}
+
+main
+
