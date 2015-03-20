@@ -1,6 +1,12 @@
 #!/bin/bash
 
-set -eu
+set -e
+
+function show_help() {
+  echo "Usage: git branch-pack [-h] [-a] <branch names>"
+  echo "    -h: show help"
+  echo "    -a: pack all of branches (ignore following branch names)"
+}
 
 function copy_tracked_files_to() {
   base_dir=$1
@@ -28,20 +34,19 @@ function make_package_dir() {
   done
 }
 
-function main() {
+function pack_branches() {
+  branches=($@)
+
   project_prefix=$(basename `git rev-parse --show-toplevel`)
 
   git stash > /dev/null 2>&1
   original_branch=$(git branch -a | grep '^*' | sed -e 's/^* //')
 
-  IFS=$'\n'
-
-  for line in `git branch`
+  for branch in "${branches[@]}"
   do
-    branch_name=$(echo $line | sed -e 's/^[ \*]*//') # remove unnecessary prefix
-    git checkout $branch_name > /dev/null 2>&1
+    git checkout $branch > /dev/null 2>&1
 
-    base_dir="${project_prefix}_${branch_name}"
+    base_dir="${project_prefix}_${branch}"
     make_package_dir $base_dir
 
     copy_tracked_files_to $base_dir
@@ -51,5 +56,42 @@ function main() {
   git stash pop > /dev/null 2>&1
 }
 
-main
+function pack_all_branches() {
+  IFS=$'\n'
 
+  branches=()
+  for line in `git branch`
+  do
+    branches+=$(echo $line | sed -e 's/^[ \*]*//') # remove unnecessary prefix
+  done
+
+  pack_branches ${branches[@]}
+}
+
+while getopts ah opt
+do
+  case $opt in
+    "a" ) all_flug="TRUE" ;;
+    "h" ) help_flug="TRUE" ;;
+      * ) show_help
+          exit 1 ;;
+  esac
+done
+
+if [ "$help_flug" = "TRUE" ] ; then
+  show_help
+  exit 0
+fi
+
+if [ "$all_flug" = "TRUE" ] ; then
+  pack_all_branches
+  exit 0
+fi
+
+if [ $# -lt 1 ] ; then
+  echo "Too few arguments"
+  show_help
+  exit 1
+fi
+
+pack_branches $@
