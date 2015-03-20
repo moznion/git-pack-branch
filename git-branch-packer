@@ -62,7 +62,8 @@ function pack_all_branches() {
   branches=()
   for line in `git branch`
   do
-    branches+=$(echo $line | sed -e 's/^[ \*]*//') # remove unnecessary prefix
+    branch=$(echo $line | sed -e 's/^[ \*]*//') # remove unnecessary prefix
+    branches=("${branches[@]}" "$branch")
   done
 
   pack_branches ${branches[@]}
