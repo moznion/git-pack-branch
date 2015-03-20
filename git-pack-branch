@@ -39,7 +39,9 @@ function pack_branches() {
 
   project_prefix=$(basename `git rev-parse --show-toplevel`)
 
+  stashes_num=$(git stash list | wc -l | awk '{print $1}')
   git stash > /dev/null 2>&1
+
   original_branch=$(git branch -a | grep '^*' | sed -e 's/^* //')
 
   for branch in "${branches[@]}"
@@ -53,7 +55,11 @@ function pack_branches() {
   done
 
   git checkout $original_branch > /dev/null 2>&1
-  git stash pop > /dev/null 2>&1
+
+  if [ "$stashes_num" != "$(git stash list | wc -l | awk '{print $1}')" ] ; then
+    # execute `stash pop` when only stashed at before
+    git stash pop > /dev/null 2>&1
+  fi
 }
 
 function pack_all_branches() {
