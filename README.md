@@ -1,13 +1,13 @@
-git-branch-pack
+git-pack-branch
 ==
 
-Make package of tracked files for each branches into each directory.
+Make packages of tracked files for each branches into each directories.
 
 Usage
 --
 
 ```
-git branch-pack [-h] [-a] <branch names>
+git pack-branch [-h] [-a] <branch names>
     -h: show help
     -a: pack all of branches (ignore following branch names)
 ```

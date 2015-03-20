@@ -3,7 +3,7 @@
 set -e
 
 function show_help() {
-  echo "Usage: git branch-pack [-h] [-a] <branch names>"
+  echo "Usage: git pack-branch [-h] [-a] <branch names>"
   echo "    -h: show help"
   echo "    -a: pack all of branches (ignore following branch names)"
 }
