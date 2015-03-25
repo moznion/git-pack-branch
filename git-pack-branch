@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 function show_help() {
   echo "Usage: git pack-branch [-h] [-a] <branch names>"
   echo "    -h: show help"
