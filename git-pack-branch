@@ -18,7 +18,7 @@ function copy_tracked_files_to() {
       mkdir -p $dir
     fi
 
-    cp $file $dir
+    cp -R $file $dir
   done
 }
 
