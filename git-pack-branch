@@ -49,6 +49,7 @@ function pack_branches() {
     git checkout $branch > /dev/null 2>&1
 
     base_dir="${project_prefix}_${branch}"
+    base_dir=${base_dir/\//.} # to remove slash from path
     make_package_dir $base_dir
 
     copy_tracked_files_to $base_dir
